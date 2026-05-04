@@ -1260,13 +1260,40 @@ _ulCSS.textContent = '@keyframes ulBob{0%,100%{transform:translateY(0);}50%{tran
 document.head.appendChild(_ulCSS);
 document.body.appendChild(_ulOverlay);
 
+// Intro audio track
+const _introAudio = new Audio('sounds/intro.mp3');
+_introAudio.volume = 0.4;
+
 document.getElementById('_ulBtn').addEventListener('click', e => {
   e.stopPropagation();
   _ulOverlay.style.transition = 'opacity .7s';
   _ulOverlay.style.opacity = '0';
   setTimeout(() => _ulOverlay.remove(), 750);
-  _unlock(); // just unlock, no sound on click
+  _unlock();
+  // Play cinematic intro sound through the 15s sequence
+  _introAudio.play().catch(() => {});
 });
+
+// Stop intro audio when main site reveals
+const _audioRevObs = new MutationObserver(muts => {
+  muts.forEach(m => {
+    if (m.target.classList.contains('revealed')) {
+      // Fade out intro audio smoothly
+      const fadeOut = setInterval(() => {
+        if (_introAudio.volume > 0.02) {
+          _introAudio.volume = Math.max(0, _introAudio.volume - 0.03);
+        } else {
+          _introAudio.pause();
+          _introAudio.currentTime = 0;
+          clearInterval(fadeOut);
+        }
+      }, 80);
+      _audioRevObs.disconnect();
+    }
+  });
+});
+const _msAudio = document.getElementById('main-site');
+if (_msAudio) _audioRevObs.observe(_msAudio, {attributes:true, attributeFilter:['class']});
 
 // ── MUTE BUTTON ──
 const _muteBtn = document.createElement('button');
