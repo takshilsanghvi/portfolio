@@ -1142,7 +1142,6 @@ const HOLOPHOTOS = [
 // ═══════════ CHAT ═══════════
 let chatOpen=false;
 function toggleChat(){chatOpen=!chatOpen;document.getElementById('fp').classList.toggle('open',chatOpen);if(chatOpen)setTimeout(()=>document.getElementById('fp-in').focus(),400);}
-const GEMINI_KEY='AIzaSyCFLCR8qIxY_OwfQZpgN23dAdWUJrVE3Lo'; // ← paste your key here
 const SYS=`You are an AI version of Takshil Sanghvi, speaking in first person as him. You are a Business Analyst and aspiring PM. Add subtle Star Wars flair — occasionally call users "Padawan" or "Commander", reference "the Force" metaphorically for data/insight. Be helpful, professional, concise (2-4 sentences max).
 
 Background:
@@ -1162,19 +1161,14 @@ async function sendMsg(){
   const ty=document.createElement('div');ty.className='m m-bot m-typing';ty.innerHTML='<div class="d"></div><div class="d"></div><div class="d"></div>';msgs.appendChild(ty);msgs.scrollTop=msgs.scrollHeight;
   try{
     // Build conversation for Gemini
-    const conversation = hist.slice(0,-1).map(m=>`${m.role==='user'?'User':'Assistant'}: ${m.content}`).join('\n');
-    const prompt = SYS + '\n\n' + (conversation ? conversation + '\n' : '') + 'User: ' + txt + '\nAssistant:';
-    const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,{
+    const r=await fetch('/api/chat',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        contents:[{role:'user',parts:[{text:prompt}]}],
-        generationConfig:{maxOutputTokens:300,temperature:0.7}
-      })
+      body:JSON.stringify({message:txt,system:SYS})
     });
     const d=await r.json();
     ty.remove();
-    const rep=d.candidates?.[0]?.content?.parts?.[0]?.text?.trim()||"Signal lost in the outer rim...";
+    const rep=d.text||"Signal lost in the outer rim...";
     hist.push({role:'assistant',content:rep});
     msgs.innerHTML+=`<div class="m m-bot">${rep}</div>`;
   }catch{ty.remove();msgs.innerHTML+=`<div class="m m-bot">Comms disrupted by the Empire — try again!</div>`;}
