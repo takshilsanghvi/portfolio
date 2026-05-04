@@ -889,7 +889,7 @@ const DATA={
     {icon:"💼",title:"LinkedIn",sub:"Join the Rebellion →",href:"https://www.linkedin.com/in/takshil1/"},
     {icon:"⚙️",title:"GitHub",sub:"Intel Repository →",href:"https://github.com/takshilsanghvi"},
     {icon:"✉️",title:"Email",sub:"Send a raven →",href:"mailto:Takshil1112@gmail.com"},
-    {icon:"📄",title:"Resume",sub:"Full mission dossier →",href:"#"}
+    {icon:"📄",title:"Resume",sub:"Full mission dossier →",href:"https://drive.google.com/file/d/1nMUnq0RFkxvIttGgGybyr-N4VcTPvVyz/view?usp=sharing"}
   ]
 };
 
@@ -1064,23 +1064,21 @@ function initReveal(){
 // caption = text shown below
 const HOLOPHOTOS = [
   {
-    url: 'https://images.unsplash.com/photo-1530099486328-e021101a494a?w=600&q=80',
-    caption: '🚀 Met Sunita Williams — NASA Astronaut & Space Pioneer'
+    url: 'https://i.imgur.com/W05xlln.jpeg',
+    caption: '🚀 Honoured to meet Sunita Williams — NASA Astronaut'
   },
   {
-    url: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=600&q=80',
-    caption: '✈️ Met Tony Fernandes — CEO, AirAsia'
+    url: 'https://i.imgur.com/ov6Pb76.jpeg',
+    caption: '🏆 Met Nobel Laureate Giorgio Parisi — Physics 2021'
   },
   {
-    url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80',
-    caption: '🏆 Met Abhijit Banerjee — Nobel Laureate, Economics'
+    url: 'https://i.imgur.com/WrOrH9W.jpeg',
+    caption: '✈️ Got a chance to visit JFK Air Traffic Control'
   },
   {
-    url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&q=80',
-    caption: '💡 NYU Leadership Summit — Panel Discussion 2025'
+    url: 'https://i.imgur.com/bY88BvY.jpeg',
+    caption: '🎓 With NYU President Linda Mills'
   },
-  // ── ADD YOUR REAL PHOTOS BELOW ──
-  // { url: 'YOUR_IMGUR_OR_GDRIVE_URL', caption: '⭐ Met [Name] — [Title]' },
 ];
 
 (function initHolo(){
@@ -1162,7 +1160,7 @@ async function sendMsg(){
   msgs.innerHTML+=`<div class="m m-user">${txt}</div>`;
   const ty=document.createElement('div');ty.className='m m-bot m-typing';ty.innerHTML='<div class="d"></div><div class="d"></div><div class="d"></div>';msgs.appendChild(ty);msgs.scrollTop=msgs.scrollHeight;
   try{
-    const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:SYS,messages:hist})});
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:SYS,messages:hist})});
     const d=await r.json();ty.remove();
     const rep=d.content?.[0]?.text||"Signal lost in the outer rim...";
     hist.push({role:'assistant',content:rep});
@@ -1171,131 +1169,12 @@ async function sendMsg(){
   msgs.scrollTop=msgs.scrollHeight;
 }
 
-// ═══════════════════════════════════
-// SOUND SYSTEM — clean single version
-// ═══════════════════════════════════
-const TONES = {
-  intro:    { freq:[220,440,660],          type:'sine',     dur:1.4, vol:0.15 },
-  saber:    { freq:[900,500,250],          type:'sawtooth', dur:0.8, vol:0.12 },
-  click:    { freq:[880,660],              type:'sine',   dur:0.08,vol:0.05 },
-  hover:    { freq:[1000],                 type:'sine',     dur:0.06,vol:0.05 },
-  whoosh:   { freq:[700,80],               type:'sawtooth', dur:0.4, vol:0.08 },
-  r2:       { freq:[1800,1400,1900,1600],  type:'sine',     dur:0.22,vol:0.10 },
-  chatopen: { freq:[500,700,1000],         type:'sine',     dur:0.35,vol:0.10 },
-};
-
+// ═══════════════════════════
+// SOUND SYSTEM — hover + reveal only
+// ═══════════════════════════
 let _ctx = null;
 let _unlocked = false;
 let _muted = false;
-
-function _getCtx() {
-  if (!_ctx) _ctx = new (window.AudioContext || window.webkitAudioContext)();
-  return _ctx;
-}
-
-function _play(name) {
-  if (_muted) return;
-  const t = TONES[name];
-  if (!t) return;
-  try {
-    const ctx = _getCtx();
-    if (ctx.state === 'suspended') ctx.resume();
-    const now = ctx.currentTime;
-    t.freq.forEach((f, i) => {
-      const osc  = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.type = t.type;
-      osc.frequency.setValueAtTime(f, now + i * 0.05);
-      if (name === 'saber')  osc.frequency.exponentialRampToValueAtTime(f * 0.25, now + t.dur);
-      if (name === 'whoosh') osc.frequency.exponentialRampToValueAtTime(50, now + t.dur);
-      gain.gain.setValueAtTime(0, now + i * 0.05);
-      gain.gain.linearRampToValueAtTime(t.vol / t.freq.length, now + i * 0.05 + 0.03);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + t.dur + i * 0.06);
-      osc.start(now + i * 0.05);
-      osc.stop(now + t.dur + i * 0.06 + 0.1);
-    });
-  } catch(e) {}
-}
-
-
-// ── CINEMATIC 15s INTRO MUSIC ──
-function _playCinematic() {
-  try {
-    const ctx = _getCtx();
-    if (ctx.state === 'suspended') ctx.resume();
-    const now = ctx.currentTime;
-    const dur = 17;
-
-    // Master — very subtle, background feel
-    const master = ctx.createGain();
-    const compressor = ctx.createDynamicsCompressor();
-    compressor.threshold.value = -24;
-    compressor.ratio.value = 4;
-    master.connect(compressor);
-    compressor.connect(ctx.destination);
-    master.gain.setValueAtTime(0, now);
-    master.gain.linearRampToValueAtTime(0.06, now + 2);   // fade in gently
-    master.gain.setValueAtTime(0.06, now + dur - 2.5);
-    master.gain.linearRampToValueAtTime(0, now + dur);    // fade out
-
-    // Helper: smooth sine oscillator
-    function sineLayer(freq, startTime, duration, peakVol, freqEnd) {
-      const osc  = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain); gain.connect(master);
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq, startTime);
-      if (freqEnd) osc.frequency.linearRampToValueAtTime(freqEnd, startTime + duration);
-      gain.gain.setValueAtTime(0, startTime);
-      gain.gain.linearRampToValueAtTime(peakVol, startTime + Math.min(2, duration * 0.3));
-      gain.gain.setValueAtTime(peakVol, startTime + duration - 1.5);
-      gain.gain.linearRampToValueAtTime(0, startTime + duration);
-      osc.start(startTime);
-      osc.stop(startTime + duration + 0.1);
-    }
-
-    // Deep space bass — very low, felt more than heard
-    sineLayer(40, now, dur, 0.6, 42);
-    sineLayer(60, now, dur, 0.4, 58);
-
-    // Mid harmonic pad — gentle chord (Dm feel: D F A)
-    sineLayer(146.8, now + 0.5, dur - 0.5, 0.25);  // D3
-    sineLayer(174.6, now + 1.0, dur - 1.0, 0.20);  // F3
-    sineLayer(220.0, now + 1.5, dur - 1.5, 0.18);  // A3
-    sineLayer(293.7, now + 2.0, dur - 2.0, 0.14);  // D4
-
-    // Soft swell at 4s — adds warmth
-    sineLayer(110,  now + 4, 10, 0.15, 116);
-    sineLayer(165,  now + 5, 9,  0.12, 170);
-
-    // Gentle shimmer — very quiet high notes
-    sineLayer(880,  now + 6, 8, 0.05);
-    sineLayer(1046, now + 7, 7, 0.04);
-
-    // Slow pulse — every 3s, very soft thud (heartbeat of space)
-    for (let i = 0; i < 5; i++) {
-      const bt = now + 1.5 + i * 3;
-      const osc  = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain); gain.connect(master);
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(55, bt);
-      osc.frequency.exponentialRampToValueAtTime(35, bt + 0.6);
-      gain.gain.setValueAtTime(0, bt);
-      gain.gain.linearRampToValueAtTime(0.5, bt + 0.08);
-      gain.gain.exponentialRampToValueAtTime(0.001, bt + 0.8);
-      osc.start(bt); osc.stop(bt + 1);
-    }
-
-    // Rising tension at 12s — anticipation before reveal
-    sineLayer(130, now + 12, 4, 0.10, 196);
-    sineLayer(196, now + 13, 3, 0.07, 260);
-
-  } catch(e) {}
-}
-
 
 function _unlock(cb) {
   if (_unlocked) { cb && cb(); return; }
@@ -1305,12 +1184,59 @@ function _unlock(cb) {
   } catch(e) { cb && cb(); }
 }
 
-// ── MUTE BUTTON ──
-const _muteBtn = document.createElement('button');
-_muteBtn.innerHTML = '🔊';
-_muteBtn.style.cssText = 'position:fixed;bottom:2.5rem;left:2.5rem;z-index:500;width:42px;height:42px;border-radius:50%;background:rgba(6,13,32,.9);border:1px solid rgba(255,232,31,.35);color:rgba(255,232,31,.8);font-size:1rem;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;';
-_muteBtn.addEventListener('click', () => { _muted=!_muted; _muteBtn.innerHTML=_muted?'🔇':'🔊'; _muteBtn.style.opacity=_muted?'0.4':'1'; });
-document.body.appendChild(_muteBtn);
+function _getCtx() {
+  if (!_ctx) _ctx = new (window.AudioContext || window.webkitAudioContext)();
+  return _ctx;
+}
+
+// Soft sine blip for hover
+function _playHover() {
+  if (_muted || !_unlocked) return;
+  try {
+    const ctx = _getCtx();
+    if (ctx.state === 'suspended') ctx.resume();
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(660, now);
+    osc.frequency.linearRampToValueAtTime(880, now + 0.06);
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.04, now + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
+    osc.start(now); osc.stop(now + 0.15);
+  } catch(e) {}
+}
+
+// Clean 4-note rising chord — simple and effective
+function _playReveal() {
+  if (_muted) return;
+  try {
+    const ctx = _getCtx();
+    if (ctx.state === 'suspended') ctx.resume();
+    const now = ctx.currentTime;
+    const master = ctx.createGain();
+    master.connect(ctx.destination);
+    master.gain.setValueAtTime(0, now);
+    master.gain.linearRampToValueAtTime(0.06, now + 0.6);
+    master.gain.setValueAtTime(0.06, now + 2.8);
+    master.gain.linearRampToValueAtTime(0, now + 4.5);
+    [[220, 0], [277, 0.18], [330, 0.36], [440, 0.54]].forEach(([freq, delay]) => {
+      const osc  = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(master);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now + delay);
+      gain.gain.setValueAtTime(0, now + delay);
+      gain.gain.linearRampToValueAtTime(0.28, now + delay + 0.25);
+      gain.gain.setValueAtTime(0.28, now + 2.6);
+      gain.gain.linearRampToValueAtTime(0, now + 4.5);
+      osc.start(now + delay);
+      osc.stop(now + 4.8);
+    });
+  } catch(e) {}
+}
 
 // ── ENTER GALAXY BUTTON ──
 const _ulOverlay = document.createElement('div');
@@ -1321,7 +1247,7 @@ _ulOverlay.innerHTML = `
     <div style="font-family:Orbitron,monospace;font-size:clamp(1.2rem,4vw,2rem);font-weight:900;color:#ffe81f;letter-spacing:6px;text-shadow:0 0 30px rgba(255,232,31,.5);margin-bottom:.5rem;">REBEL INTELLIGENCE</div>
     <div style="font-family:'Share Tech Mono',monospace;font-size:.7rem;color:rgba(255,232,31,.4);letter-spacing:4px;margin-bottom:2.5rem;">CLASSIFIED DOSSIER — TS-2026</div>
     <button id="_ulBtn" style="font-family:'Share Tech Mono',monospace;font-size:.82rem;letter-spacing:4px;padding:1.1rem 3rem;background:transparent;border:1px solid rgba(255,232,31,.5);color:#ffe81f;cursor:pointer;text-transform:uppercase;clip-path:polygon(12px 0%,100% 0%,calc(100% - 12px) 100%,0% 100%);animation:ulPulse 2s ease-in-out infinite;">▶ ENTER THE GALAXY</button>
-    <div style="font-family:'Share Tech Mono',monospace;font-size:.55rem;color:rgba(255,232,31,.22);letter-spacing:3px;margin-top:1.5rem;">// click to enable sound</div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:.55rem;color:rgba(255,232,31,.22);letter-spacing:3px;margin-top:1.5rem;">// click to begin</div>
   </div>`;
 const _ulCSS = document.createElement('style');
 _ulCSS.textContent = '@keyframes ulBob{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}} @keyframes ulPulse{0%,100%{box-shadow:0 0 15px rgba(255,232,31,.2);}50%{box-shadow:0 0 35px rgba(255,232,31,.5);}}';
@@ -1333,25 +1259,21 @@ document.getElementById('_ulBtn').addEventListener('click', e => {
   _ulOverlay.style.transition = 'opacity .7s';
   _ulOverlay.style.opacity = '0';
   setTimeout(() => _ulOverlay.remove(), 750);
-  // Unlock then play long cinematic intro music for the full 15s sequence
-  _unlock(() => {
-    _playCinematic();
-    _play('intro');
-  });
+  _unlock(); // just unlock, no sound on click
 });
 
-// ── SKIP ALL patches audio unlock too ──
-const _origSkipAll = window.skipAll;
-window.skipAll = function() {
-  _origSkipAll && _origSkipAll();
-  _unlock(() => _play('saber'));
-};
+// ── MUTE BUTTON ──
+const _muteBtn = document.createElement('button');
+_muteBtn.innerHTML = '🔊';
+_muteBtn.style.cssText = 'position:fixed;bottom:2.5rem;left:2.5rem;z-index:500;width:42px;height:42px;border-radius:50%;background:rgba(6,13,32,.9);border:1px solid rgba(255,232,31,.35);color:rgba(255,232,31,.8);font-size:1rem;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;';
+_muteBtn.addEventListener('click', () => { _muted=!_muted; _muteBtn.innerHTML=_muted?'🔇':'🔊'; _muteBtn.style.opacity=_muted?'0.4':'1'; });
+document.body.appendChild(_muteBtn);
 
-// ── MAIN SITE REVEAL → saber ──
+// ── MAIN SITE REVEAL → gentle chord ──
 const _revObs = new MutationObserver(muts => {
   muts.forEach(m => {
     if (m.target.classList.contains('revealed')) {
-      _unlock(() => setTimeout(() => _play('saber'), 150));
+      setTimeout(() => _playReveal(), 300);
       _revObs.disconnect();
     }
   });
@@ -1359,49 +1281,16 @@ const _revObs = new MutationObserver(muts => {
 const _ms = document.getElementById('main-site');
 if (_ms) _revObs.observe(_ms, {attributes:true, attributeFilter:['class']});
 
-// ── HOVER ──
+// ── HOVER on buttons/cards only ──
 let _hCD = false;
 document.addEventListener('mouseover', e => {
-  if (_hCD || !_unlocked || _muted) return;
-  if (e.target.closest('.btn-gold,.btn-holo,.nav-links a,.conn,.proj-card,.s-tag,.holo-prev,.holo-next')) {
-    _play('hover'); _hCD = true; setTimeout(() => _hCD = false, 280);
+  if (_hCD || !_unlocked) return;
+  if (e.target.closest('.btn-gold,.btn-holo,.nav-links a,.conn,.proj-card,.holo-prev,.holo-next,.force-orb')) {
+    _playHover();
+    _hCD = true;
+    setTimeout(() => _hCD = false, 300);
   }
 });
 
-// ── CLICK ──
-document.addEventListener('click', e => {
-  if (!_unlocked || _muted) return;
-  const el = e.target.closest('a,button');
-  if (el && !['_ulBtn','_muteBtn'].includes(el.id)) _play('click');
-});
-
-// ── SCROLL WHOOSH — attached after main site reveals ──
-const _revObs2 = new MutationObserver(muts => {
-  muts.forEach(m => {
-    if (m.target.classList.contains('revealed')) {
-      _revObs2.disconnect();
-      // Small delay so page has rendered
-      setTimeout(() => {
-        const _wObs = new IntersectionObserver(entries => {
-          entries.forEach(en => {
-            if (en.isIntersecting && !en.target.dataset.wp) {
-              en.target.dataset.wp = '1';
-              if (_unlocked) _play('whoosh');
-            }
-          });
-        }, {threshold:0.2});
-        document.querySelectorAll('.exp-item,.proj-card,.conn').forEach(el => _wObs.observe(el));
-      }, 2000);
-    }
-  });
-});
-const _ms2 = document.getElementById('main-site');
-if (_ms2) _revObs2.observe(_ms2, {attributes:true, attributeFilter:['class']});
-
-// ── CHAT ──
-const _origTC = window.toggleChat;
-window.toggleChat = function() { _origTC && _origTC(); if (_unlocked) _play('chatopen'); };
-
 </script>
 </body>
-</html>
